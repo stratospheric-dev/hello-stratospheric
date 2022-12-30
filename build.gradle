@@ -1,0 +1,37 @@
+plugins {
+  id 'org.springframework.boot' version '2.7.3'
+  id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+  id 'java'
+}
+
+group = 'dev.stratospheric'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+  implementation 'org.springframework.boot:spring-boot-starter-validation'
+  implementation 'org.springframework.boot:spring-boot-starter-web'
+  implementation 'com.google.code.findbugs:jsr305:3.0.2'
+  developmentOnly 'org.springframework.boot:spring-boot-devtools'
+  testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+test {
+  useJUnitPlatform()
+}
+
+bootRun {
+  jvmArgs = [
+    "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005",
+    "-Dspring.profiles.active=dev",
+  ]
+}
+
+jar {
+  enabled = false
+}

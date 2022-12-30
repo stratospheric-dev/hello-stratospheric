@@ -1,0 +1,19 @@
+{
+  "name": "hello-cdk",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "repository:deploy": "cdk deploy --app \"./mvnw -e -q compile exec:java -Dexec.mainClass=com.myorg.DockerRepositoryApp\" --require-approval never --profile stratospheric",
+    "repository:destroy": "cdk destroy --app \"./mvnw -e -q compile exec:java -Dexec.mainClass=com.myorg.DockerRepositoryApp\" --require-approval never --profile stratospheric",
+    "network:deploy": "cdk deploy --app \"./mvnw -e -q compile exec:java -Dexec.mainClass=com.myorg.NetworkApp\" --require-approval never --profile stratospheric",
+    "network:destroy": "cdk destroy --app \"./mvnw -e -q compile exec:java -Dexec.mainClass=com.myorg.NetworkApp\" --require-approval never --profile stratospheric",
+    "service:deploy": "cdk deploy --app \"./mvnw -e -q compile exec:java -Dexec.mainClass=com.myorg.ServiceApp\" --require-approval never --profile stratospheric",
+    "service:destroy": "cdk destroy --app \"./mvnw -e -q compile exec:java -Dexec.mainClass=com.myorg.ServiceApp\" --require-approval never --profile stratospheric"
+  },
+  "devDependencies": {
+    "aws-cdk": "2.43.1"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
