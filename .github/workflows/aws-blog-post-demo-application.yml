@@ -1,0 +1,27 @@
+name: Demo Application
+
+on:
+  push:
+    paths:
+      - 'getting-started-with-spring-boot-on-aws/**'
+      - '.github/workflows/aws-blog-post-demo-application.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    name: Build demo application
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: 17
+          cache: 'gradle'
+
+      - name: Build application
+        working-directory: getting-started-with-spring-boot-on-aws
+        run: ./gradlew build --stacktrace

@@ -1,0 +1,92 @@
+# This workflow builds the Docker image for the Todo-App and then deploys the application.
+name: 04 - Publish Todo-App
+
+env:
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  
+  build-and-publish:
+    runs-on: ubuntu-20.04
+    name: Build and publish Todo App
+    outputs:
+      dockerImageTag: ${{ steps.dockerImageTag.outputs.tag }}
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: 17
+          cache: 'gradle'
+
+      - name: Build application
+        working-directory: application
+        run: ./gradlew build --stacktrace
+
+      - name: Zip build reports
+        if: always()
+        run: zip -r reports.zip **/build/reports
+
+      - name: Upload build reports
+        uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: reports
+          path: reports.zip
+
+      - name: Create Docker image tag
+        id: dockerImageTag
+        run: echo "DOCKER_IMAGE_TAG=$(date +'%Y%m%d%H%M%S')-${GITHUB_SHA} >> $GITHUB_ENV"
+
+      - name: Publish Docker image to ECR registry
+        if: github.ref == 'refs/heads/main' || contains(github.event.head_commit.message, 'DEPLOY NOW')
+        env:
+          DOCKER_IMAGE_TAG: ${{ env.DOCKER_IMAGE_TAG }}
+        working-directory: application
+        run: |
+          docker build -t hello-world-app .
+          docker tag hello-world-app ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/hello-world-app:${DOCKER_IMAGE_TAG}
+          docker tag hello-world-app ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/hello-world-app:latest
+          aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/hello-world-app:${DOCKER_IMAGE_TAG}
+          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/hello-world-app:latest
+
+  deploy:
+    runs-on: ubuntu-20.04
+    name: Deploy Todo App
+    needs: build-and-publish
+    timeout-minutes: 15
+    if: github.ref == 'refs/heads/main'
+    concurrency: hello-world-deployment
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: 17
+          cache: 'maven'
+
+      - name: NPM install
+        working-directory: cdk
+        run: npm install
+
+      - name: Deploy service stack to staging
+        working-directory: cdk
+        env:
+          DOCKER_IMAGE_TAG: ${{ env.DOCKER_IMAGE_TAG }}
+        run: npm run service:deploy -- -c dockerImageTag=${DOCKER_IMAGE_TAG} -c environmentName=staging
