@@ -1,5 +1,5 @@
 # This workflow builds the Docker image for the Todo-App and then deploys the application.
-name: 04 - Publish Todo-App
+name: 03 - Build and deploy the app
 
 env:
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
