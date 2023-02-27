@@ -31,7 +31,6 @@ jobs:
           cache: 'gradle'
 
       - name: Build application
-        working-directory: application
         run: ./gradlew build --stacktrace
 
       - name: Zip build reports
