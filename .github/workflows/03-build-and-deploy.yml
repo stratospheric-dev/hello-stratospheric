@@ -35,7 +35,7 @@ jobs:
 
       - name: Zip build reports
         if: always()
-        run: zip -r reports.zip **/build/reports
+        run: zip -r reports.zip build/reports
 
       - name: Upload build reports
         uses: actions/upload-artifact@v1
