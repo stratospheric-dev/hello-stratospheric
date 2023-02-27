@@ -1,4 +1,4 @@
-package main.java.dev.stratospheric.todoapp;
+package dev.stratospheric.hello;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
