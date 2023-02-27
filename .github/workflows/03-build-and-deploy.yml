@@ -52,7 +52,6 @@ jobs:
         if: github.ref == 'refs/heads/main' || contains(github.event.head_commit.message, 'DEPLOY NOW')
         env:
           DOCKER_IMAGE_TAG: ${{ env.DOCKER_IMAGE_TAG }}
-        working-directory: application
         run: |
           docker build -t hello-world-app .
           docker tag hello-world-app ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/hello-world-app:${DOCKER_IMAGE_TAG}
