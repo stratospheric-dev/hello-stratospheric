@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-20.04
     name: Build and publish Todo App
     outputs:
-      dockerImageTag: ${{ steps.dockerImageTag.outputs.tag }}
+      dockerImageTag: ${{ steps.dockerImageTag.outputs.DOCKER_IMAGE_TAG }}
     steps:
 
       - name: Checkout code
@@ -46,12 +46,12 @@ jobs:
 
       - name: Create Docker image tag
         id: dockerImageTag
-        run: echo "DOCKER_IMAGE_TAG=$(date +'%Y%m%d%H%M%S')-${GITHUB_SHA} >> $GITHUB_ENV"
+        run: echo "DOCKER_IMAGE_TAG=$(date +'%Y%m%d%H%M%S')-${GITHUB_SHA} >> $GITHUB_OUTPUT"
 
       - name: Publish Docker image to ECR registry
         if: github.ref == 'refs/heads/main' || contains(github.event.head_commit.message, 'DEPLOY NOW')
         env:
-          DOCKER_IMAGE_TAG: ${{ env.DOCKER_IMAGE_TAG }}
+          DOCKER_IMAGE_TAG: ${{ steps.dockerImageTag.outputs.DOCKER_IMAGE_TAG }}
         run: |
           docker build -t hello-world-app .
           docker tag hello-world-app ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/hello-world-app:${DOCKER_IMAGE_TAG}
@@ -86,5 +86,5 @@ jobs:
       - name: Deploy service stack to staging
         working-directory: cdk
         env:
-          DOCKER_IMAGE_TAG: ${{ env.DOCKER_IMAGE_TAG }}
+          DOCKER_IMAGE_TAG: ${{ steps.dockerImageTag.outputs.DOCKER_IMAGE_TAG }}
         run: npm run service:deploy -- -c dockerImageTag=${DOCKER_IMAGE_TAG} -c environmentName=staging
