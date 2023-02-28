@@ -17,8 +17,7 @@ jobs:
     runs-on: ubuntu-20.04
     name: Build and publish Todo App
     outputs:
-      DOCKER_IMAGE_TAG:
-        value: ${{ steps.create-docker-image-tag.outputs.DOCKER_IMAGE_TAG }}
+      DOCKER_IMAGE_TAG: ${{ steps.create-docker-image-tag.outputs.DOCKER_IMAGE_TAG }}
     steps:
 
       - name: Checkout code
