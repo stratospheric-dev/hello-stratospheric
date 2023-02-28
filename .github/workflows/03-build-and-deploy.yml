@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-20.04
     name: Build and publish Todo App
     outputs:
-      dockerImageTag: ${{ steps.dockerImageTag.outputs.DOCKER_IMAGE_TAG }}
+      DOCKER_IMAGE_TAG: ${{ steps.create-docker-image-tag.outputs.DOCKER_IMAGE_TAG }}
     steps:
 
       - name: Checkout code
@@ -45,14 +45,14 @@ jobs:
           path: reports.zip
 
       - name: Create Docker image tag
-        id: dockerImageTag
+        id: create-docker-image-tag
         run: echo "DOCKER_IMAGE_TAG=$(date +'%Y%m%d%H%M%S')-${GITHUB_SHA} >> $GITHUB_OUTPUT"
 
       - name: Publish Docker image to ECR registry
         if: github.ref == 'refs/heads/main' || contains(github.event.head_commit.message, 'DEPLOY NOW')
         run: |
           docker build -t hello-world-app .
-          docker tag hello-world-app ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/hello-world-app:${{ steps.dockerImageTag.outputs.DOCKER_IMAGE_TAG }}
+          docker tag hello-world-app ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/hello-world-app:${{ steps.create-docker-image-tag.outputs.DOCKER_IMAGE_TAG }}
           docker tag hello-world-app ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/hello-world-app:latest
           aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
           docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/hello-world-app:${{ steps.dockerImageTag.outputs.DOCKER_IMAGE_TAG }}
@@ -83,4 +83,4 @@ jobs:
 
       - name: Deploy service stack to staging
         working-directory: cdk
-        run: npm run service:deploy -- -c dockerImageTag=${{ steps.dockerImageTag.outputs.DOCKER_IMAGE_TAG }} -c environmentName=staging
+        run: npm run service:deploy -- -c dockerImageTag=${{ needs.build-and-publish.outputs.DOCKER_IMAGE_TAG }} -c environmentName=staging
