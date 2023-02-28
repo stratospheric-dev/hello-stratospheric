@@ -17,7 +17,8 @@ jobs:
     runs-on: ubuntu-20.04
     name: Build and publish Todo App
     outputs:
-      DOCKER_IMAGE_TAG: ${{ steps.create-docker-image-tag.outputs.DOCKER_IMAGE_TAG }}
+      DOCKER_IMAGE_TAG:
+        value: ${{ steps.create-docker-image-tag.outputs.DOCKER_IMAGE_TAG }}
     steps:
 
       - name: Checkout code
@@ -46,7 +47,7 @@ jobs:
 
       - name: Create Docker image tag
         id: create-docker-image-tag
-        run: echo "DOCKER_IMAGE_TAG=$(date +'%Y%m%d%H%M%S')-${GITHUB_SHA} >> $GITHUB_OUTPUT"
+        run: echo "DOCKER_IMAGE_TAG=$(date +'%Y%m%d%H%M%S')-${GITHUB_SHA}" >> $GITHUB_OUTPUT
 
       - name: Publish Docker image to ECR registry
         if: github.ref == 'refs/heads/main' || contains(github.event.head_commit.message, 'DEPLOY NOW')
