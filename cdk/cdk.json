@@ -12,10 +12,10 @@
     ]
   },
   "context": {
-    "region": "ap-southeast-2",
-    "accountId": "221875718260",
-    "applicationName": "hello-world-app",
-    "dockerRepositoryName": "hello-world-app",
+    "region": "us-east-1",
+    "accountId": "962120964865",
+    "applicationName": "todo-app",
+    "dockerRepositoryName": "todo-app",
     "dockerImageTag": "latest",
     "@aws-cdk/aws-apigateway:usagePlanKeyOrderInsensitiveId": true,
     "@aws-cdk/core:stackRelativeExports": true,
